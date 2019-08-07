@@ -86,7 +86,7 @@ io.sockets.on('connection', (socket) => {
             socket.nickname = info.username;
             nicknames.push({name: socket.nickname, id: info.user_id, socket: socket.id});
 
-            io.sockets.in(commonRoom).emit("user join", socket.nickname);
+            io.sockets.in(commonRoom).emit("user join", {id: socket.user_id, name: socket.nickname});
         }
         console.log(nicknames);
 
