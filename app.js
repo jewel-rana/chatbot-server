@@ -189,7 +189,7 @@ io.sockets.on('connection', (socket) => {
         // nicknames.delete(nicknames[socket.nickname]);
         // delete nicknames[socket.nickname];
         for( let i = 0; i < nicknames.length; i++ ) {
-            if( nicknames[i].user_id == socket.user_id){
+            if( nicknames[i].id == socket.user_id){
                 nicknames.splice(i, 1);
             }
         }
