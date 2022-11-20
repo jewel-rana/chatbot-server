@@ -2,9 +2,15 @@
 const express = require('express');
 const app = express();
 const server = require("http").createServer(app);
-const io = require("socket.io").listen(server); //PORT
+const options = {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+}
+const io = require("socket.io")(server, options)
 const port = process.env.PORT || 4000;
-const hostname = "192.168.0.117";
+const hostname = "127.0.0.1";
 server.listen(port, hostname, () => {
   console.log("Server Running on port " + hostname + ":" + port);
 });
@@ -37,8 +43,8 @@ const mysql = require('mysql');
 const con = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '123456',
-    database: 'chatbot'
+    password: '26236566',
+    database: 'chat'
 });
 
 con.connect(function(err) {
@@ -168,7 +174,7 @@ io.sockets.on('connection', (socket) => {
 
         // console.log('Receiver ID : ' + receiver_id + 'Sender : ' + sender_id);
         con.query(
-      "SELECT chats.id, chats.message, chats.sending_at, chats.user_id as sender_id, S.name as sender_name, R.name as receiver_name FROM chats LEFT JOIN users as S ON chats.user_id=S.id LEFT JOIN users R ON chats.receiver_id=R.id WHERE chats.user_id="+ receiver_id +" OR chats.receiver_id="+receiver_id+" ORDER BY chats.id desc LIMIT 8",
+      "SELECT chats.id, chats.message, chats.created_at, chats.user_id as sender_id, S.name as sender_name, R.name as receiver_name FROM chats LEFT JOIN users as S ON chats.user_id=S.id LEFT JOIN users R ON chats.receiver_id=R.id WHERE chats.user_id="+ receiver_id +" OR chats.receiver_id="+receiver_id+" ORDER BY chats.id desc LIMIT 8",
       (err, rows) => {
             if( err == null ) {
                 let data = rows;
@@ -210,7 +216,7 @@ function updateNickNames(socket) {
 
 function getUnAcceptedList(callback) {
     con.query(
-      "SELECT chats.id, chats.message, chats.sending_at, chats.user_id as sender_id, S.name as sender_name FROM chats LEFT JOIN users as S ON chats.user_id=S.id WHERE chats.receiver_id='0' GROUP BY chats.user_id LIMIT 10",
+      "SELECT chats.id, chats.message, chats.created_at, chats.user_id as sender_id, S.name as sender_name FROM chats LEFT JOIN users as S ON chats.user_id=S.id WHERE chats.receiver_id='0' GROUP BY chats.user_id LIMIT 10",
       (err, rows) => {
             if( err == null ) {
                 let data = rows;
@@ -225,13 +231,14 @@ function getUnAcceptedList(callback) {
 
 function getGroupMessages(callback) {
     con.query(
-      "SELECT chats.id, chats.message, chats.sending_at, chats.user_id as sender_id, S.name as sender_name FROM chats LEFT JOIN users as S ON chats.user_id=S.id WHERE chats.type='g' ORDER BY id DESC LIMIT 20",
+      "SELECT chats.id, chats.message, chats.created_at, chats.user_id as sender_id, S.name as sender_name FROM chats LEFT JOIN users as S ON chats.user_id=S.id WHERE chats.type='g' ORDER BY id DESC LIMIT 20",
       (err, rows) => {
             if( err == null ) {
                 let data = rows;
                 callback(data);
             } else {
-                socket.emit('bug reporting', err);
+                console.log(err);
+                // socket.emit('bug reporting', err);
             }
         });
 }
